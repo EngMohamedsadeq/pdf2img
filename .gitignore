@@ -1,0 +1,15 @@
+# runtime folders
+outputs/
+uploads/
+
+# logs
+*.log
+
+# local config (اختياري إذا فيه مسارات محلية)
+config.php
+
+# OS / IDE
+.DS_Store
+Thumbs.db
+.idea/
+.vscode/
