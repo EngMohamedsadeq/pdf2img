@@ -1,11 +1,14 @@
 <?php
-$config = require __DIR__ . "/config.php";
+$config = require __DIR__ . "/../config/config.php";
 
-$python = $config["python"];
-$poppler = $config["poppler"];
+$python = (string)($config["python"] ?? "python");
+$pythonArgs = $config["python_args"] ?? [];
+if (!is_array($pythonArgs)) $pythonArgs = [$pythonArgs];
+
+$poppler = (string)$config["poppler"];
 $uploadsDir = $config["uploads_dir"];
 $outputsDir = $config["outputs_dir"];
-$baseDir = __DIR__;
+$rootDir = dirname(__DIR__);
 
 $isAjax = isset($_SERVER["HTTP_X_REQUESTED_WITH"]) && strtolower($_SERVER["HTTP_X_REQUESTED_WITH"]) === "xmlhttprequest";
 
@@ -142,39 +145,37 @@ file_put_contents(
         ], JSON_UNESCAPED_UNICODE)
 );
 
-$convertPy = $baseDir . DIRECTORY_SEPARATOR . "convert.py";
+$convertPy = $rootDir . DIRECTORY_SEPARATOR . "scripts" . DIRECTORY_SEPARATOR . "convert.py";
 
-$cmd = escapeshellcmd($python) . " -X utf8 " .
-        escapeshellarg($convertPy) . " " .
-        escapeshellarg($pdfPath) . " " .
-        escapeshellarg($outDir) . " " .
-        escapeshellarg($poppler) . " " .
-        escapeshellarg((string)$fromPage) . " " .
-        escapeshellarg((string)$toPage) . " " .
-        escapeshellarg((string)$dpi) . " " .
-        escapeshellarg((string)$quality) . " " .
-        escapeshellarg((string)$format);
+if (!is_file($convertPy)) {
+    $sendJson(500, ["ok" => false, "error" => "convert.py غير موجود: " . $convertPy]);
+    die();
+}
+
+$cmdParts = array_merge(
+        [$python],
+        array_values($pythonArgs),
+        ["-X", "utf8", $convertPy, $pdfPath, $outDir, $poppler, (string)$fromPage, (string)$toPage, (string)$dpi, (string)$quality, (string)$format]
+);
+$cmd = implode(" ", array_map("escapeshellarg", $cmdParts));
 
 if ($isAjax) {
     $log = $outDir . DIRECTORY_SEPARATOR . "convert.log";
 
-    if (PHP_OS_FAMILY === 'Windows') {
-        // Windows background
+    if (PHP_OS_FAMILY === "Windows") {
         $bgCmd = 'cmd /c start "" /B ' . $cmd . ' > ' . escapeshellarg($log) . ' 2>&1';
         @shell_exec($bgCmd);
     } else {
-        // Linux/Colab background
         $bgCmd = 'nohup ' . $cmd . ' > ' . escapeshellarg($log) . ' 2>&1 &';
         @shell_exec($bgCmd);
     }
 
     $sendJson(200, [
-        "ok" => true,
-        "job" => $job,
-        "message" => "تم بدء التحويل"
+            "ok" => true,
+            "job" => $job,
+            "message" => "تم بدء التحويل"
     ]);
 }
-
 
 $output = shell_exec($cmd);
 if (!$output) {
@@ -199,7 +200,7 @@ $jobSafe = htmlspecialchars($job, ENT_QUOTES, 'UTF-8');
 $jobUrl  = rawurlencode($job);
 
 $title = "النتائج";
-require __DIR__ . "/views/layout_top.php";
+require __DIR__ . "/../views/layouts/layout_top.php";
 ?>
 <div class="wrap">
     <div class="top">
@@ -208,14 +209,14 @@ require __DIR__ . "/views/layout_top.php";
             <p>
                 عدد الصفحات: <span class="chip"><?= $count ?></span>
                 • النتائج:
-                <a class="link" href="folder.php?job=<?= $jobUrl ?>">فتح مجلد الصور</a>
+                <a class="link" href="../pages/folder.php?job=<?= $jobUrl ?>">فتح مجلد الصور</a>
                 <span class="chip">outputs/<?= $jobSafe ?></span>
             </p>
         </div>
         <div class="actions">
             <a class="btn" href="download_zip.php?job=<?= $jobUrl ?>">تحميل الكل ZIP</a>
-            <a class="btn" href="index.php">رفع ملف آخر</a>
-            <a class="btn" href="folder.php?job=<?= $jobUrl ?>">فتح مجلد النتائج</a>
+            <a class="btn" href="../pages/index.php">رفع ملف آخر</a>
+            <a class="btn" href="../pages/folder.php?job=<?= $jobUrl ?>">فتح مجلد النتائج</a>
         </div>
     </div>
 
@@ -242,4 +243,4 @@ require __DIR__ . "/views/layout_top.php";
         <?php endforeach; ?>
     </div>
 </div>
-<?php require __DIR__ . "/views/layout_bottom.php"; ?>
+<?php require __DIR__ . "/../views/layouts/layout_bottom.php"; ?>

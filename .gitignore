@@ -1,12 +1,9 @@
 # runtime folders
-outputs/
-uploads/
+storage/outputs/
+storage/uploads/
 
 # logs
 *.log
-
-# local config (اختياري إذا فيه مسارات محلية)
-config.php
 
 # OS / IDE
 .DS_Store

@@ -1,6 +1,6 @@
 <?php
-$config = require __DIR__ . "/config.php";
-$outputsDir = $config["outputs_dir"];
+$boot = require __DIR__ . "/../bootstrap.php";
+$outputsDir = $boot["outputsDir"];
 
 $job = $_GET["job"] ?? "";
 if (!preg_match('/^\d{8}_\d{6}_[a-f0-9]{8}$/i', $job)) {
@@ -37,14 +37,14 @@ if (is_file($summaryPath)) {
 }
 
 $title = "مجلد النتائج";
-require __DIR__ . "/views/layout_top.php";
+require __DIR__ . "/../views/layouts/layout_top.php";
 ?>
 <div class="wrap">
     <div class="top">
         <div>
             <h1>مجلد النتائج</h1>
             <p>
-                المجلد: <span class="chip">outputs/<?= $jobSafe ?></span>
+                المجلد: <span class="chip">storage/outputs/<?= $jobSafe ?></span>
                 • عدد الصور: <span class="chip"><?= count($all) ?></span>
                 <?php if ($unreadCount !== null): ?>
                     • لم تُقرأ أسماؤها تلقائيًا: <span class="chip"><?= $unreadCount ?></span>
@@ -59,7 +59,7 @@ require __DIR__ . "/views/layout_top.php";
         </div>
         <div class="actions">
             <a class="btn" href="index.php">رفع ملف آخر</a>
-            <a class="btn" href="download_zip.php?job=<?= $jobUrl ?>">تحميل الكل ZIP</a>
+            <a class="btn" href="../actions/download_zip.php?job=<?= $jobUrl ?>">تحميل الكل ZIP</a>
         </div>
     </div>
 
@@ -67,7 +67,7 @@ require __DIR__ . "/views/layout_top.php";
         <?php foreach ($all as $path): ?>
             <?php
             $file = basename($path);
-            $url  = "outputs/" . $jobUrl . "/" . rawurlencode($file);
+            $url  = "/storage/outputs/" . $jobUrl . "/" . rawurlencode($file);
             $ext = strtolower(pathinfo($file, PATHINFO_EXTENSION));
             $base = pathinfo($file, PATHINFO_FILENAME);
             ?>
@@ -116,7 +116,7 @@ require __DIR__ . "/views/layout_top.php";
 
         btn.disabled = true;
         try{
-            const res = await fetch('rename.php', {
+            const res = await fetch('/actions/rename.php', {
                 method: 'POST',
                 headers: {'Content-Type':'application/x-www-form-urlencoded; charset=UTF-8','X-Requested-With':'XMLHttpRequest'},
                 body: new URLSearchParams({job: '<?= $jobUrl ?>', old: oldName, new_base: newBase})
@@ -135,4 +135,4 @@ require __DIR__ . "/views/layout_top.php";
     }
 </script>
 
-<?php require __DIR__ . "/views/layout_bottom.php"; ?>
+<?php require __DIR__ . "/../views/layouts/layout_bottom.php"; ?>

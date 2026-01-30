@@ -1,9 +1,9 @@
 <?php
-$config = require __DIR__ . "/config.php";
-$outputsDir = $config["outputs_dir"];
+$boot = require __DIR__ . "/../bootstrap.php";
+$outputsDir = $boot["outputsDir"];
 
 $title = "سجل التحويلات";
-require __DIR__ . "/views/layout_top.php";
+require __DIR__ . "/../views/layouts/layout_top.php";
 
 $dirs = glob($outputsDir . DIRECTORY_SEPARATOR . "*", GLOB_ONLYDIR) ?: [];
 
@@ -66,7 +66,7 @@ usort($jobs, fn($a, $b) => $b["mtime"] <=> $a["mtime"]);
             <p>عدد العمليات: <span class="chip" id="jobsCount"><?= count($jobs) ?></span></p>
         </div>
         <div class="actions">
-            <a class="btn" href="index.php">رفع ملف جديد</a>
+            <a class="btn" href="/pages/index.php">رفع ملف جديد</a>
         </div>
     </div>
 
@@ -139,9 +139,9 @@ usort($jobs, fn($a, $b) => $b["mtime"] <=> $a["mtime"]);
                 </div>
 
                 <div class="job-actions">
-                    <a class="act primary" href="folder.php?job=<?= $jobUrl ?>">فتح</a>
-                    <a class="act" href="download_zip.php?job=<?= $jobUrl ?>">تحميل ZIP</a>
-                    <a class="act danger" href="delete_job.php?job=<?= $jobUrl ?>" onclick="return confirm('هل أنت متأكد من حذف هذه النتائج؟');">حذف</a>
+                    <a class="act primary" href="/pages/folder.php?job=<?= $jobUrl ?>">فتح</a>
+                    <a class="act" href="/actions/download_zip.php?job=<?= $jobUrl ?>">تحميل ZIP</a>
+                    <a class="act danger" href="/actions/delete_job.php?job=<?= $jobUrl ?>" onclick="return confirm('هل أنت متأكد من حذف هذه النتائج؟');">حذف</a>
                 </div>
             </div>
         <?php endforeach; ?>
@@ -166,4 +166,4 @@ usort($jobs, fn($a, $b) => $b["mtime"] <=> $a["mtime"]);
     </div>
 </div>
 
-<?php require __DIR__ . "/views/layout_bottom.php"; ?>
+<?php require __DIR__ . "/../views/layouts/layout_bottom.php"; ?>

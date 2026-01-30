@@ -33,7 +33,6 @@
     let isBusy = false;
     let uploadPhaseMsg = 'بانتظار البدء...';
 
-
     function stopPoll(){
         if (pollTimer) {
             clearInterval(pollTimer);
@@ -135,7 +134,7 @@
             dlgMsg.textContent = text;
 
             openResults.hidden = false;
-            openResults.href = `folder.php?job=${encodeURIComponent(job)}`;
+            openResults.href = `/pages/folder.php?job=${encodeURIComponent(job)}`;
 
             stopPoll();
             if (statusBtn) statusBtn.style.display = 'none';
@@ -159,7 +158,7 @@
         stopPoll();
         currentJob = job;
 
-        const url = `progress.php?job=${encodeURIComponent(job)}&t=${Date.now()}`;
+        const url = `/actions/progress.php?job=${encodeURIComponent(job)}&t=${Date.now()}`;
 
         pollTimer = setInterval(async () => {
             try {
@@ -211,7 +210,6 @@
         if (lastData) applyProgress(lastData, currentJob);
     });
 
-
     form.addEventListener('submit', async (e) => {
         e.preventDefault();
 
@@ -227,13 +225,11 @@
 
         if (statusBtn) statusBtn.style.display = 'block';
 
-
         submitBtn.disabled = true;
 
         uploadPhaseMsg = 'جاري رفع الملف...';
         setUploadActive(uploadPhaseMsg);
         dlgMsg.textContent = uploadPhaseMsg;
-
 
         try {
             const fd = new FormData(form);
@@ -274,6 +270,7 @@
         } catch (err) {
             setError('حدث خطأ أثناء رفع الملف.');
             submitBtn.disabled = false;
+            isBusy = false;
         }
     });
 
@@ -358,7 +355,7 @@
 })();
 
 
-    (() => {
+(() => {
     function build(select){
         if (select.dataset.customized === '1') return;
 
@@ -429,8 +426,8 @@
     }
 
     function init(){
-    document.querySelectorAll('.opts select.in').forEach(build);
-}
+        document.querySelectorAll('.opts select.in').forEach(build);
+    }
 
     if (document.readyState === 'loading') document.addEventListener('DOMContentLoaded', init);
     else init();

@@ -1,5 +1,5 @@
 <?php
-$config = require __DIR__ . "/config.php";
+$config = require __DIR__ . "/../config/config.php";
 $outputsDir = $config["outputs_dir"];
 
 $isAjax = isset($_SERVER["HTTP_X_REQUESTED_WITH"]) && strtolower($_SERVER["HTTP_X_REQUESTED_WITH"]) === "xmlhttprequest";

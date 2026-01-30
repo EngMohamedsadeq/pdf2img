@@ -1,5 +1,5 @@
 <?php
-$config = require __DIR__ . "/config.php";
+$config = require __DIR__ . "/../config/config.php";
 $outputsDir = $config["outputs_dir"];
 
 $job = $_GET["job"] ?? "";

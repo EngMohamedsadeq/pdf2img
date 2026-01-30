@@ -1,6 +1,6 @@
 <?php
-$config = require __DIR__ . "/config.php";
-$outputsDir = $config["outputs_dir"];
+$boot = require __DIR__ . "/../bootstrap.php";
+$outputsDir = $boot["outputsDir"];
 
 $job = $_GET["job"] ?? "";
 if (!preg_match('/^\d{8}_\d{6}_[a-f0-9]{8}$/i', $job)) {
@@ -19,7 +19,11 @@ if (!class_exists('ZipArchive')) {
     die("ZipArchive غير متوفر في PHP. فعّل zip extension.");
 }
 
-$files = glob($dir . DIRECTORY_SEPARATOR . "*.jpg");
+$files = array_merge(
+    glob($dir . DIRECTORY_SEPARATOR . "*.jpg") ?: [],
+    glob($dir . DIRECTORY_SEPARATOR . "*.png") ?: [],
+    glob($dir . DIRECTORY_SEPARATOR . "*.webp") ?: []
+);
 sort($files);
 
 if (!$files) {

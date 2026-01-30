@@ -1,5 +1,5 @@
 <?php
-$config = require __DIR__ . "/config.php";
+$config = require __DIR__ . "/../config/config.php";
 $outputsDir = $config["outputs_dir"];
 
 $job = $_GET["job"] ?? "";
@@ -29,5 +29,5 @@ $rrmdir = function($path) use (&$rrmdir) {
 
 $rrmdir($dir);
 
-header("Location: history.php");
+header("Location: /pages/history.php");
 exit;
