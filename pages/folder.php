@@ -50,6 +50,7 @@ require __DIR__ . "/../views/layouts/layout_top.php";
                     • لم تُقرأ أسماؤها تلقائيًا: <span class="chip"><?= $unreadCount ?></span>
                 <?php endif; ?>
             </p>
+
             <?php if ($unreadCount !== null && $unreadCount > 0): ?>
                 <p class="hint">
                     الصفحات التي فشل فيها استخراج الرقم:
@@ -57,6 +58,7 @@ require __DIR__ . "/../views/layouts/layout_top.php";
                 </p>
             <?php endif; ?>
         </div>
+
         <div class="actions">
             <a class="btn" href="index.php">رفع ملف آخر</a>
             <a class="btn" href="../actions/download_zip.php?job=<?= $jobUrl ?>">تحميل الكل ZIP</a>
@@ -67,14 +69,15 @@ require __DIR__ . "/../views/layouts/layout_top.php";
         <?php foreach ($all as $path): ?>
             <?php
             $file = basename($path);
-            $url  = "/storage/outputs/" . $jobUrl . "/" . rawurlencode($file);
-            $ext = strtolower(pathinfo($file, PATHINFO_EXTENSION));
+            $url  = "../storage/outputs/" . $jobUrl . "/" . rawurlencode($file);
+            $ext  = strtolower(pathinfo($file, PATHINFO_EXTENSION));
             $base = pathinfo($file, PATHINFO_FILENAME);
             ?>
             <div class="img-card">
                 <a class="thumb" href="<?= $url ?>" target="_blank">
                     <img src="<?= $url ?>" alt="">
                 </a>
+
                 <div class="meta">
                     <div class="row" style="align-items:center; gap:10px;">
                         <a href="<?= $url ?>" download>تحميل</a>
@@ -88,8 +91,7 @@ require __DIR__ . "/../views/layouts/layout_top.php";
                                data-old="<?= htmlspecialchars($file, ENT_QUOTES, 'UTF-8') ?>"
                                style="width:100%;">
 
-                        <button class="btn" type="button" onclick="renameFile(this)"
-                                style="width:100%;">
+                        <button class="btn" type="button" onclick="renameFile(this)" style="width:100%;">
                             تغيير الاسم
                         </button>
                     </div>
@@ -109,26 +111,48 @@ require __DIR__ . "/../views/layouts/layout_top.php";
         const input = box.querySelector('input');
         const oldName = input.getAttribute('data-old');
         const newBase = (input.value || '').trim();
+
         if(!newBase){
             alert('اكتب اسم جديد');
             return;
         }
 
         btn.disabled = true;
+
         try{
-            const res = await fetch('/actions/rename.php', {
+            const res = await fetch('../actions/rename.php', {
                 method: 'POST',
-                headers: {'Content-Type':'application/x-www-form-urlencoded; charset=UTF-8','X-Requested-With':'XMLHttpRequest'},
-                body: new URLSearchParams({job: '<?= $jobUrl ?>', old: oldName, new_base: newBase})
+                headers: {
+                    'Content-Type':'application/x-www-form-urlencoded; charset=UTF-8',
+                    'X-Requested-With':'XMLHttpRequest'
+                },
+                body: new URLSearchParams({
+                    job: '<?= $jobUrl ?>',
+                    old: oldName,
+                    new_base: newBase
+                })
             });
-            const data = await res.json();
-            if(!data.ok){
-                alert(data.error || 'فشل التعديل');
+
+            const text = await res.text();
+            let data = null;
+
+            try { data = JSON.parse(text); } catch (_) {}
+
+            if (!res.ok) {
+                const msg = (data && data.error) ? data.error : (text ? text.slice(0, 200) : `HTTP ${res.status}`);
+                alert(`فشل الطلب: ${msg}`);
                 return;
             }
+
+            if (!data || data.ok !== true) {
+                alert((data && data.error) ? data.error : 'رد غير صالح من السيرفر');
+                return;
+            }
+
             location.reload();
+
         }catch(e){
-            alert('خطأ في الاتصال');
+            alert('خطأ في الاتصال: ' + (e && e.message ? e.message : ''));
         }finally{
             btn.disabled = false;
         }
